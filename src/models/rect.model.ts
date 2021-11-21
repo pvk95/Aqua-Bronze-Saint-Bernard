@@ -1,3 +1,5 @@
+import { Circle } from './circle.model';
+import { Line } from './line.model';
 import { Point, Shape, Type } from './shape.model'
 
 export class Rect implements Shape {
@@ -13,12 +15,50 @@ export class Rect implements Shape {
     this.height = height;
   }
 
+  /**
+   * Cecks whether the Rectangle shape intersects with other shape objects
+   * @param other User provided shape object
+   * @returns a boolean whether the rectangle collides with other shape object
+   */
+
   collides(other: Shape): boolean {
     switch (other.type) {
       case Type.CIRCLE:
-        throw new Error('Implement Rectangle to Circle collision checking');
+
+        const circle: Circle = Circle.fromShape(other);
+        return circle.collides(this);
+        
       case Type.RECT:
-        throw new Error('Implement Rectangle to Rectangle collision checking');
+      
+        const rect: Rect = Rect.fromShape(other);
+
+        const l1: Point = <Point>{x: this.center.x - this.width / 2, y: this.center.y + this.height / 2}
+        const r1: Point = <Point>{x: this.center.x + this.width / 2, y: this.center.y - this.height / 2}
+
+        const l2: Point = <Point>{x: rect.center.x - rect.width / 2, y: rect.center.y + rect.height / 2}
+        const r2: Point = <Point>{x: rect.center.x + rect.width / 2, y: rect.center.y - rect.height / 2}
+
+        if (l1.x > r2.x || l2.x > r1.x) return false;
+
+        else if (r2.y > l1.y || r2.y > l2.y) return false;
+
+        return true;
+
+      case Type.LINE:
+
+        const line: Line = Line.fromShape(other);
+
+        const point1: Point = <Point>{x: this.center.x - this.width / 2, y: this.center.y - this.height / 2}
+        const point2: Point = <Point>{x: this.center.x - this.width / 2, y: this.center.y + this.height / 2}
+        const point3: Point = <Point>{x: this.center.x + this.width / 2, y: this.center.y + this.height / 2}
+        const point4: Point = <Point>{x: this.center.x + this.width / 2, y: this.center.y - this.height / 2}
+
+        if (Line.isIntersect(line, point1, point2)) return true;
+        else if (Line.isIntersect(line, point2, point3)) return true;
+        else if (Line.isIntersect(line, point3, point4)) return true;
+        else if (Line.isIntersect(line, point4, point1)) return true;
+        else return false;
+
       default:
         throw new Error(`Invalid shape type!`);
     }

@@ -1,4 +1,5 @@
 import { Rect } from './rect.model'
+import { Line } from './line.model' 
 import { distanceBetween, Point, Shape, Type } from './shape.model'
 
 export class Circle implements Shape {
@@ -12,10 +13,16 @@ export class Circle implements Shape {
     this.radius = radius;
   }
 
+  /**
+   * Checks whether the Circle shape collides with the provided Shape Object
+   * @param other Other shape p
+   * @returns true for collision and false for non-collision
+   */
+
   collides(other: Shape): boolean {
     switch (other.type) {
       case Type.CIRCLE:
-        const _other = <Circle>(<any>other);
+        const _other = Circle.fromShape(other);
         const distance = distanceBetween(this.center, _other.center);
 
         return distance <= this.radius + _other.radius;
@@ -42,6 +49,21 @@ export class Circle implements Shape {
           Math.pow(pointDistance.y - rect.height / 2, 2);
 
         return circleToRectDistance <= Math.pow(this.radius, 2);
+
+        case Type.LINE:
+          
+          const line: Line = Line.fromShape(other);
+      
+          const a: number = distanceBetween(line.center, this.center)
+          const b: number = distanceBetween(line.center, line.end)
+
+          const cosine: number = Math.abs((line.center.x - this.center.x) * (line.center.x - line.end.x) + 
+                                            (line.center.y - this.center.y) * (line.center.y - line.end.y)) / (a* b + 1e-3);
+          const sine: number = Math.sqrt((1 - Math.pow(cosine, 2)));
+          const projection: number = a * sine;
+
+          return projection - this.radius <= 1e-3;
+          
       default:
         throw new Error(`Invalid shape type!`);
     }
